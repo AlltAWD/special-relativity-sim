@@ -1,0 +1,125 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7f5;
+  --fg: #1d1d1f;
+  --muted: #5f6368;
+  --line: #d9d9d6;
+  --accent: #1f6feb;
+
+  /* Canvas palette, read by the simulations through getComputedStyle. */
+  --sim-bg: #ffffff;
+  --sim-grid: #ececea;
+  --sim-axis: #3c4043;
+  --sim-prime: #1a7f37;
+  --sim-light: #b7791f;
+  --sim-cone: rgba(183, 121, 31, 0.10);
+  --sim-timelike: #1f6feb;
+  --sim-spacelike: #cf222e;
+  --sim-lightlike: #b7791f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111315;
+    --fg: #e8e8e6;
+    --muted: #9aa0a6;
+    --line: #2c2f33;
+    --accent: #58a6ff;
+
+    --sim-bg: #0d1117;
+    --sim-grid: #1c2128;
+    --sim-axis: #adbac7;
+    --sim-prime: #57ab5a;
+    --sim-light: #daaa3f;
+    --sim-cone: rgba(218, 170, 63, 0.10);
+    --sim-timelike: #58a6ff;
+    --sim-spacelike: #f47067;
+    --sim-lightlike: #daaa3f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+header, main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 { margin: 0.5rem 0 0; font-size: 1.6rem; }
+h2 { margin: 0; font-size: 1.25rem; }
+header p, .blurb, .hint, .readout { color: var(--muted); margin: 0.25rem 0 0.75rem; }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+nav a {
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+nav a:hover { background: var(--line); }
+nav a[aria-current="true"] { background: var(--accent); color: #fff; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-bottom: 8px;
+}
+
+.control { display: flex; align-items: center; gap: 8px; }
+.control output { min-width: 4.5em; font-variant-numeric: tabular-nums; }
+
+button {
+  font: inherit;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+canvas.diagram {
+  display: block;
+  width: 100%;
+  aspect-ratio: 7 / 5;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: crosshair;
+}
+
+table.events {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+table.events th, table.events td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+td.timelike { color: var(--sim-timelike); }
+td.spacelike { color: var(--sim-spacelike); }
+td.lightlike { color: var(--sim-lightlike); }
+
+.todo { color: var(--muted); }
+code { font-size: 0.9em; }
