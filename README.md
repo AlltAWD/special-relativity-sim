@@ -1,5 +1,7 @@
 # Special Relativity Simulator
 
+**Live:** https://alltawd.github.io/special-relativity-sim/
+
 Interactive simulations of special relativity in the browser, in natural units
 (c = 1). Plain TypeScript with Vite, Canvas 2D for diagrams and three.js for 3D
 scenes. No framework, no server.
