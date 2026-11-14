@@ -1,0 +1,71 @@
+/*
+ * Design tokens. One rule runs through the whole interface:
+ *
+ *   the chrome is neutral, and colour means physics.
+ *
+ * Buttons, navigation and text use only the ink/paper tokens. A colour appears
+ * only where it stands for something in the simulation: green is the moving
+ * frame S', gold is light, and blue / rose / gold are the three kinds of
+ * interval. A control that changes S' is green, so the panel doubles as the
+ * legend for the figure.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Chrome */
+  --bg: #f3f4f7;
+  --surface: #ffffff;
+  --sunken: #f5f6f9;
+  --ink: #12151c;
+  --ink-2: #4a5160;
+  --ink-3: #636b7c;
+  --line: #dfe2e8;
+  --line-2: #c4c9d3;
+  --focus: #1763c7;
+
+  /* Physics palette, also read by the canvases through cssVar() in ui/theme.ts. */
+  --sim-bg: #ffffff;
+  --sim-grid: #eceef2;
+  --sim-axis: #12151c;
+  --sim-muted: #636b7c;
+  --sim-prime: #007a65;
+  --sim-light: #9c5c00;
+  --sim-cone: rgba(214, 150, 20, 0.11);
+  --sim-timelike: #1763c7;
+  --sim-spacelike: #c2255c;
+  --sim-lightlike: #9c5c00;
+
+  /* Type */
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-math: 'STIX Two Text Variable', 'STIX Two Text', Cambria, 'Times New Roman', Times, serif;
+
+  /* Shape */
+  --radius: 7px;
+  --radius-lg: 12px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0b0d12;
+  --surface: #11141b;
+  --sunken: #171b24;
+  --ink: #e8eaf0;
+  --ink-2: #a9b0bf;
+  --ink-3: #8891a2;
+  --line: #232834;
+  --line-2: #363d4c;
+  --focus: #6cb0ff;
+
+  --sim-bg: #11141b;
+  --sim-grid: #1b202b;
+  --sim-axis: #e8eaf0;
+  --sim-muted: #8891a2;
+  --sim-prime: #3ccfaa;
+  --sim-light: #f0b849;
+  --sim-cone: rgba(240, 184, 73, 0.1);
+  --sim-timelike: #6cb0ff;
+  --sim-spacelike: #ff7aa5;
+  --sim-lightlike: #f0b849;
+}

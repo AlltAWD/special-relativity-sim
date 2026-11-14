@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- A light cone: two 45-degree light lines with the future shaded. -->
+  <rect width="32" height="32" rx="7.5" fill="#11141b"/>
+  <path d="M16 16 7 7h18z" fill="#f0b849" opacity="0.32"/>
+  <path d="M7 7l18 18M25 7 7 25" fill="none" stroke="#f0b849" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

@@ -3,20 +3,89 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:," />
+    <meta
+      name="description"
+      content="Interactive simulations of special relativity in the browser: Minkowski diagrams, time dilation, length contraction and more, in natural units (c = 1)."
+    />
+    <meta property="og:title" content="Special Relativity Simulator" />
+    <meta
+      property="og:description"
+      content="Interactive simulations of special relativity in the browser, in natural units (c = 1)."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Special Relativity Simulator</title>
+    <script>
+      // Choose the theme before the first paint, so the page never flashes the wrong one.
+      // src/ui/theme.ts takes over from here.
+      (function () {
+        var saved = null;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch (e) {}
+        var dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
   </head>
   <body>
-    <header>
-      <h1>Special Relativity Simulator</h1>
-      <p>Interactive simulations of special relativity, with c = 1.</p>
-      <nav id="tabs" aria-label="Simulations"></nav>
-    </header>
-    <main>
-      <h2 id="sim-title"></h2>
-      <p id="sim-blurb" class="blurb"></p>
-      <section id="stage"></section>
-    </main>
+    <a class="skip-link" href="#main">Skip to the simulation</a>
+    <div class="app">
+      <header class="rail">
+        <a class="brand" href="#" aria-label="Special Relativity Simulator, first simulation">
+          <!-- The mark is a light cone: two 45-degree light lines with the future shaded. -->
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <rect class="brand-mark-tile" x="0.5" y="0.5" width="31" height="31" rx="7.5" />
+            <path class="brand-mark-cone" d="M16 16 7 7h18z" />
+            <path class="brand-mark-light" d="M7 7l18 18M25 7 7 25" />
+          </svg>
+          <span class="brand-name">Special <br />Relativity</span>
+        </a>
+        <div class="rail-actions">
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch theme">
+            <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
+            </svg>
+            <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+            </svg>
+          </button>
+          <a
+            class="icon-btn"
+            href="https://github.com/AlltAWD/special-relativity-sim"
+            aria-label="Source code on GitHub"
+            title="Source code on GitHub"
+          >
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5" />
+            </svg>
+          </a>
+        </div>
+        <nav id="nav" aria-label="Simulations">
+          <p class="nav-label">Simulations</p>
+          <ol class="nav-list"></ol>
+        </nav>
+        <aside class="rail-note" aria-label="Units">
+          <p class="nav-label">Units</p>
+          <p>
+            <span class="math"><var>c</var> = 1</span>, so every speed is a fraction of the speed of light, and one
+            unit of distance is how far light travels in one unit of time.
+          </p>
+          <p><span class="math"><var>γ</var> = 1 / √(1 − <var>v</var>²)</span></p>
+        </aside>
+      </header>
+      <main id="main" tabindex="-1">
+        <header class="sim-head">
+          <p class="eyebrow" id="sim-index"></p>
+          <h1 id="sim-title"></h1>
+          <p id="sim-blurb" class="blurb"></p>
+        </header>
+        <div id="stage">
+          <noscript><p class="blurb">The simulations are drawn by JavaScript, which is turned off in this browser.</p></noscript>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
