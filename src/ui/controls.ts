@@ -1,9 +1,13 @@
 /**
- * Controls shared by the simulations: sliders, switches, buttons and canvas
- * sizing. No framework, just elements. Their looks live in styles/kit.css, and
- * `npm run dev` shows every one of them at http://localhost:5173/#kit.
+ * Controls shared by the simulations: sliders, switches, buttons, fields and
+ * canvas sizing. No framework, just elements. Their looks live in
+ * styles/kit.css, and `npm run dev` shows every one of them at
+ * http://localhost:5173/#kit.
  */
+import { ICON_PATHS, type IconName } from './icons';
 import { onThemeChange } from './theme';
+
+export type { IconName };
 
 export function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -27,22 +31,15 @@ const uniqueId = (prefix: string) => `${prefix}-${++nextId}`;
 
 // ---------- Icons ----------
 
-const ICONS = {
-  play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
-  pause: '<path d="M8.5 5.5v13M15.5 5.5v13"/>',
-  reset: '<path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5M4.5 4.5V9H9"/>',
-  plus: '<path d="M12 5.5v13M5.5 12h13"/>',
-  close: '<path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/>',
-} as const;
-
-export type IconName = keyof typeof ICONS;
-
+/** A Material Symbols icon. The names are the ones in ui/icons.ts. */
 export function icon(name: IconName): SVGSVGElement {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('viewBox', '0 -960 960 960');
   svg.setAttribute('aria-hidden', 'true');
   svg.classList.add('icon');
-  svg.innerHTML = ICONS[name];
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', ICON_PATHS[name]);
+  svg.append(path);
   return svg;
 }
 
@@ -61,6 +58,9 @@ export interface SliderOptions {
   /** Values to print under the track. Clicking one jumps to it. */
   marks?: number[];
 }
+
+/** How to move a slider from code, kept per slider element. See setSlider(). */
+const sliderSetters = new WeakMap<HTMLElement, (value: number) => void>();
 
 /**
  * A labelled range input that shows its current value. If the range spans
@@ -88,7 +88,7 @@ export function slider(opts: SliderOptions): HTMLElement {
   );
   if (opts.tone) root.dataset.tone = opts.tone;
 
-  // --p is the thumb position and --o where the fill starts, both from 0 to 1.
+  // --p is the handle position and --o where the fill starts, both from 0 to 1.
   const origin = opts.min < 0 && opts.max > 0 ? fraction(0) : 0;
   root.style.setProperty('--o', String(origin));
   const paint = () => {
@@ -97,6 +97,10 @@ export function slider(opts: SliderOptions): HTMLElement {
     readout.textContent = format(value);
   };
   paint();
+  sliderSetters.set(root, (value) => {
+    input.value = String(value);
+    paint();
+  });
 
   input.addEventListener('input', () => {
     paint();
@@ -110,6 +114,7 @@ export function slider(opts: SliderOptions): HTMLElement {
       const jump = el('button', { type: 'button', tabIndex: -1 }, String(mark).replace('-', '−'));
       jump.style.setProperty('--at', String(fraction(mark)));
       jump.addEventListener('click', () => {
+        if (input.disabled) return;
         input.value = String(mark);
         input.dispatchEvent(new Event('input'));
       });
@@ -121,9 +126,20 @@ export function slider(opts: SliderOptions): HTMLElement {
   return root;
 }
 
-// ---------- Toggle ----------
+/** Move a slider from code. This does not call its onInput. */
+export function setSlider(root: HTMLElement, value: number): void {
+  sliderSetters.get(root)?.(value);
+}
 
-/** A small sample of what a toggle shows or hides, drawn next to its label. */
+/** Grey a slider out, or bring it back. */
+export function enableSlider(root: HTMLElement, enabled: boolean): void {
+  const input = root.querySelector('input');
+  if (input) input.disabled = !enabled;
+}
+
+// ---------- Switch ----------
+
+/** A small sample of what a switch shows or hides, drawn next to its label. */
 export type Swatch = 'line' | 'dashed' | 'grid';
 
 export interface ToggleOptions {
@@ -157,21 +173,32 @@ export function swatch(kind: Swatch, tone?: Tone): HTMLSpanElement {
   return node;
 }
 
+/** A filled dot. `color` is any CSS colour, such as 'var(--cat-1)'. */
+export function dot(color: string): HTMLSpanElement {
+  const node = el('span', { className: 'dot' });
+  node.style.setProperty('--dot', color);
+  node.setAttribute('aria-hidden', 'true');
+  return node;
+}
+
 // ---------- Buttons ----------
 
 export interface ButtonOptions {
   icon?: IconName;
   /** Show only the icon. The label is still what screen readers announce. */
   iconOnly?: boolean;
-  /** The main action of a group: filled instead of outlined. */
-  primary?: boolean;
+  /**
+   * How much the button stands out: 'filled' for the one main action,
+   * 'tonal' for a secondary one, 'outlined' (the default) and 'text' for the rest.
+   */
+  variant?: 'outlined' | 'filled' | 'tonal' | 'text';
   /** A more compact button, for a group's title row. */
   small?: boolean;
 }
 
 export function button(label: string, onClick: () => void, opts: ButtonOptions = {}): HTMLButtonElement {
   const node = el('button', { type: 'button', className: 'btn' });
-  if (opts.primary) node.classList.add('btn--primary');
+  if (opts.variant && opts.variant !== 'outlined') node.classList.add(`btn--${opts.variant}`);
   if (opts.small) node.classList.add('btn--small');
   if (opts.icon) node.append(icon(opts.icon));
   if (opts.iconOnly) {
@@ -185,18 +212,29 @@ export function button(label: string, onClick: () => void, opts: ButtonOptions =
   return node;
 }
 
+/** A round button that is only an icon, with no outline: for quiet actions such as "remove". */
+export function iconButton(label: string, name: IconName, onClick: () => void, small = false): HTMLButtonElement {
+  const node = el('button', { type: 'button', className: 'icon-btn', title: label }, icon(name));
+  if (small) node.classList.add('icon-btn--small');
+  node.setAttribute('aria-label', label);
+  node.addEventListener('click', onClick);
+  return node;
+}
+
 export interface SegmentedOptions<T extends string> {
   /** Announced by screen readers; not shown. */
   label: string;
   options: { value: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
+  small?: boolean;
 }
 
 /** A row of mutually exclusive choices, such as a 2D / 3D view switch. */
 export function segmented<T extends string>(opts: SegmentedOptions<T>): HTMLElement {
   const name = uniqueId('segmented');
   const root = el('div', { className: 'segmented' });
+  if (opts.small) root.classList.add('segmented--small');
   root.setAttribute('role', 'radiogroup');
   root.setAttribute('aria-label', opts.label);
   for (const option of opts.options) {
@@ -204,8 +242,73 @@ export function segmented<T extends string>(opts: SegmentedOptions<T>): HTMLElem
     input.addEventListener('change', () => {
       if (input.checked) opts.onChange(option.value);
     });
-    root.append(el('label', {}, input, el('span', {}, option.label)));
+    root.append(el('label', {}, input, el('span', {}, icon('check'), option.label)));
   }
+  return root;
+}
+
+// ---------- Fields ----------
+
+export interface NumberFieldOptions {
+  /** Shown above the field. Leave it out in a table, and give `name` instead. */
+  label?: string;
+  /** What screen readers announce when there is no visible label. */
+  name?: string;
+  value: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  /** Called with a valid number each time the visitor changes the field. */
+  onChange: (value: number) => void;
+  small?: boolean;
+}
+
+export interface NumberField {
+  el: HTMLElement;
+  /** Show a new value. This does not call onChange. */
+  set(value: number): void;
+}
+
+/** A box for typing a number. Out-of-range input is brought back into range. */
+export function numberField(opts: NumberFieldOptions): NumberField {
+  const input = el('input', { type: 'number', value: String(opts.value) });
+  if (opts.min !== undefined) input.min = String(opts.min);
+  if (opts.max !== undefined) input.max = String(opts.max);
+  input.step = String(opts.step ?? 'any');
+  if (opts.name) input.setAttribute('aria-label', opts.name);
+  input.addEventListener('input', () => {
+    const value = input.valueAsNumber;
+    if (!Number.isFinite(value)) return; // half-typed, such as "-" or ""
+    opts.onChange(Math.min(opts.max ?? Infinity, Math.max(opts.min ?? -Infinity, value)));
+  });
+  const root = el('label', { className: 'field' });
+  if (opts.small) root.classList.add('field--small');
+  if (opts.label) root.append(el('span', { className: 'field-label' }, opts.label));
+  root.append(input);
+  return {
+    el: root,
+    set(value) {
+      // Leave the field alone while it is being typed in.
+      if (document.activeElement !== input) input.value = String(value);
+    },
+  };
+}
+
+export interface SelectOptions<T extends string> {
+  label: string;
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+  small?: boolean;
+}
+
+/** A menu of choices: for more options than fit in a segmented button. */
+export function select<T extends string>(opts: SelectOptions<T>): HTMLElement {
+  const menu = el('select', {}, ...opts.options.map((option) =>
+    el('option', { value: option.value, selected: option.value === opts.value }, option.label)));
+  menu.addEventListener('change', () => opts.onChange(menu.value as T));
+  const root = el('label', { className: 'field' }, el('span', { className: 'field-label' }, opts.label), menu);
+  if (opts.small) root.classList.add('field--small');
   return root;
 }
 

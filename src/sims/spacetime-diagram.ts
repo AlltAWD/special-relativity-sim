@@ -15,8 +15,8 @@
  *  - every number shown comes from physics/lorentz.ts.
  */
 import { boost, classifyInterval, gamma, interval, unboost, type Event2D, type IntervalKind } from '../physics/lorentz';
-import { button, el, fitCanvas, icon, slider, swatch, toggle } from '../ui/controls';
-import { bench, defs, group, legend, math, note, row, srOnly, stat, stats } from '../ui/layout';
+import { button, el, fitCanvas, iconButton, slider, swatch, toggle } from '../ui/controls';
+import { bench, defs, group, legend, math, note, srOnly, stat, stats } from '../ui/layout';
 import { cssVars } from '../ui/theme';
 import type { Sim } from './types';
 
@@ -152,7 +152,7 @@ function mount(root: HTMLElement): () => void {
     { head: 's²', className: 'starts-block' },
   ];
   const tbody = el('tbody');
-  const table = el('table', { className: 'events' },
+  const table = el('table', { className: 'table' },
     el('thead', {}, el('tr', {},
       el('th', { scope: 'col' }, srOnly('Event')),
       ...columns.map((col) => el('th', { scope: 'col', className: col.className }, math(col.head))),
@@ -168,7 +168,7 @@ function mount(root: HTMLElement): () => void {
     const ev = add(t, x);
     update();
     rows.get(ev.id)?.chip.focus(); // ready to be nudged with the arrow keys
-  }, { icon: 'plus', small: true });
+  }, { icon: 'add', small: true, variant: 'tonal' });
 
   const clearButton = button('Clear', () => {
     events = [];
@@ -176,7 +176,7 @@ function mount(root: HTMLElement): () => void {
     hoverId = focusId = dragId = null;
     update();
     addButton.focus();
-  }, { small: true });
+  }, { small: true, variant: 'text' });
 
   root.append(bench({
     figure: [canvas, probe],
@@ -198,10 +198,10 @@ function mount(root: HTMLElement): () => void {
         stats(gammaStat),
       ),
       group({ title: ['Events'], aside: [addButton, clearButton] }, el('div', { className: 'table-wrap' }, table), empty),
-      group('Show', row(
+      group('Show',
         toggle('Light cone', showCone, (on) => { showCone = on; update(); }, { swatch: 'dashed', tone: 'light' }),
         toggle('Grid', showGrid, (on) => { showGrid = on; update(); }, { swatch: 'grid' }),
-      )),
+      ),
       // The things you operate come first; the explanations go last, where a
       // short window scrolls them out of the way.
       group('Key',
@@ -361,8 +361,7 @@ function mount(root: HTMLElement): () => void {
   function makeRow(ev: Marked): HTMLTableRowElement {
     const chip = el('button', { type: 'button', className: 'event-chip' });
     const cells = columns.map((col) => el('td', { className: col.className }));
-    const removeButton = el('button', { type: 'button', className: 'icon-btn', title: 'Remove' }, icon('close'));
-    removeButton.setAttribute('aria-label', `Remove event ${ev.label}`);
+    const removeButton = iconButton(`Remove event ${ev.label}`, 'close', () => removeAndRefocus(), true);
     const tr = el('tr', {}, el('th', { scope: 'row' }, chip), ...cells, el('td', {}, removeButton));
 
     const removeAndRefocus = () => {
@@ -373,7 +372,6 @@ function mount(root: HTMLElement): () => void {
       const neighbour = events[index] ?? events[index - 1];
       (neighbour ? rows.get(neighbour.id)?.chip : addButton)?.focus();
     };
-    removeButton.addEventListener('click', removeAndRefocus);
 
     tr.addEventListener('pointerenter', () => { hoverId = ev.id; highlight(); });
     tr.addEventListener('pointerleave', () => {
@@ -676,6 +674,7 @@ function mount(root: HTMLElement): () => void {
 export const spacetimeDiagram: Sim = {
   id: 'spacetime',
   title: 'Spacetime Diagram',
+  icon: 'timeline',
   blurb: 'A Minkowski diagram with the light cone and a second frame, S′, moving at the speed you choose. Place events and compare their coordinates in both frames.',
   mount,
 };

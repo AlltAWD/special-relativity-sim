@@ -5,36 +5,29 @@ import './styles/kit.css';
 import { sims } from './sims';
 import { kit } from './sims/kit';
 import type { Sim } from './sims/types';
-import { el } from './ui/controls';
+import { el, icon } from './ui/controls';
 import { currentTheme, onThemeChange, setTheme } from './ui/theme';
 
 const SITE = 'Special Relativity Simulator';
 
-// The UI kit page is a tool for porting, so it is listed only in `npm run dev`.
+// The UI kit page is a tool for building simulations, so it is listed only in `npm run dev`.
 const pages: Sim[] = import.meta.env.DEV ? [...sims, kit] : sims;
 
 const navList = document.querySelector<HTMLElement>('#nav .nav-list')!;
-const index = document.querySelector<HTMLElement>('#sim-index')!;
 const title = document.querySelector<HTMLElement>('#sim-title')!;
 const blurb = document.querySelector<HTMLElement>('#sim-blurb')!;
 const stage = document.querySelector<HTMLElement>('#stage')!;
 const themeToggle = document.querySelector<HTMLButtonElement>('#theme-toggle')!;
 
-const two = (n: number) => String(n).padStart(2, '0');
-
 // ---------- Navigation ----------
 
 const links = new Map<Sim, HTMLAnchorElement>();
-pages.forEach((sim, i) => {
-  const link = el('a', { href: `#${sim.id}` },
-    el('span', { className: 'nav-num' }, two(i + 1)),
-    el('span', { className: 'nav-title' }, sim.title),
-  );
-  if (sim.soon) link.append(el('span', { className: 'nav-tag' }, 'Soon'));
-  if (import.meta.env.DEV && sim === kit) link.append(el('span', { className: 'nav-tag' }, 'Dev'));
+for (const sim of pages) {
+  const link = el('a', { href: `#${sim.id}` }, icon(sim.icon), el('span', {}, sim.title));
+  if (import.meta.env.DEV && sim === kit) link.append(el('span', { className: 'nav-tag' }, 'dev only'));
   links.set(sim, link);
   navList.append(el('li', {}, link));
-});
+}
 
 let current: Sim | null = null;
 let unmount: (() => void) | null = null;
@@ -51,7 +44,6 @@ function show() {
 
   unmount?.();
   current = sim;
-  index.textContent = `${two(pages.indexOf(sim) + 1)} / ${two(pages.length)}`;
   title.textContent = sim.title;
   blurb.textContent = sim.blurb;
   document.title = `${sim.title} · ${SITE}`;
@@ -59,22 +51,27 @@ function show() {
     if (page === sim) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
-  // On a narrow window the navigation is a scrolling strip: bring the current item into it.
-  navList.scrollTo({ left: links.get(sim)!.offsetLeft - navList.offsetLeft - 16 });
+  // On a narrow window the navigation is a row of scrolling tabs: bring the current one into view.
+  navList.scrollTo({ left: links.get(sim)!.offsetLeft - navList.offsetLeft - 24 });
+  window.scrollTo({ top: 0 });
   unmount = sim.mount(stage);
 }
 
 window.addEventListener('hashchange', show);
 show();
 
-// ---------- Theme ----------
+// ---------- Top bar ----------
 
-function labelThemeToggle() {
+document.querySelector('#source-link')!.append(icon('code'));
+
+/** The button shows the theme it switches to. */
+function showThemeToggle() {
   const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  themeToggle.replaceChildren(icon(next === 'dark' ? 'dark_mode' : 'light_mode'));
   themeToggle.setAttribute('aria-label', `Switch to the ${next} theme`);
   themeToggle.title = `Switch to the ${next} theme`;
 }
 
 themeToggle.addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
-onThemeChange(labelThemeToggle);
-labelThemeToggle();
+onThemeChange(showThemeToggle);
+showThemeToggle();

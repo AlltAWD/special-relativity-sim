@@ -1,12 +1,14 @@
 /**
  * The UI kit on one page: every control and readout from src/ui, with the call
- * that makes it. Open it at http://localhost:5173/#kit while porting.
+ * that makes it. Open it at http://localhost:5173/#kit while building a
+ * simulation.
  *
  * It is listed only in `npm run dev` (see main.ts) and is left out of the
  * published site.
  */
-import { button, el, icon, segmented, slider, swatch, toggle } from '../ui/controls';
-import { bench, defs, formula, frac, group, legend, math, note, stat, stats } from '../ui/layout';
+import { button, dot, el, iconButton, numberField, segmented, select, slider, swatch, toggle } from '../ui/controls';
+import { bench, defs, explain, formula, frac, group, inset, legend, math, note, row, stat, stats, tag } from '../ui/layout';
+import { playback } from '../ui/playback';
 import type { Sim } from './types';
 
 function mount(root: HTMLElement): () => void {
@@ -15,26 +17,36 @@ function mount(root: HTMLElement): () => void {
   const log = note('Use a control and its value appears here.');
   const say = (text: string) => { log.textContent = text; };
 
-  const speed = stat(math('v'), '0.60', 'prime');
-  const lorentz = stat(math('γ'), '1.250');
-  const proper = stat(math('Δτ'), '8.00', 'timelike');
+  const speed = stat(math('v'), { value: '0.60', unit: 'c', tone: 'prime' });
+  const lorentz = stat(math('γ'), { value: '1.250' });
+  const proper = stat(math('Δτ'), { value: '8.00', unit: 's', tone: 'timelike' });
 
-  let playing = false;
-  const playButton = button('Play', () => {
-    playing = !playing;
-    playButton.replaceChildren(icon(playing ? 'pause' : 'play'), playing ? 'Pause' : 'Play');
-    say(playing ? 'Playing' : 'Paused');
-  }, { icon: 'play', primary: true });
+  const player = playback({
+    autoplay: false,
+    onStep: (dt) => say(`playback: a frame, ${(dt * 1000).toFixed(1)} ms after the last`),
+    onReset: () => say('playback: reset'),
+  });
 
-  const sample = el('div', { className: 'soon' },
-    formula('w =', frac('u + v', '1 + uv')),
-    el('p', { className: 'soon-legend' },
-      'The figure area takes a canvas: ', code("bench({ figure: [canvas], caption: [...], panel: [...] })"),
-      '. This sample shows ', code("formula('w =', frac('u + v', '1 + uv'))"), '.'),
+  const sample = el('div', { className: 'figure-message' },
+    el('div', {},
+      formula('w =', frac('u + v', '1 + uv')),
+      el('p', { className: 'note' },
+        'The figure takes a canvas: ', code('bench({ figure: [canvas], toolbar, caption, panel })'),
+        '. This sample is ', code("formula('w =', frac('u + v', '1 + uv'))"), '.'),
+    ),
   );
 
   root.append(bench({
     figure: [sample],
+    toolbar: {
+      start: [segmented({
+        label: 'View',
+        options: [{ value: '2d', label: '2D' }, { value: '3d', label: '3D' }],
+        value: '2d',
+        onChange: (value) => say(`segmented: ${value}`),
+      })],
+      end: [player.el],
+    },
     caption: ['A caption says how to use the figure and what its units are. ', math('s² = t² − x²'), ' comes from ', code("math('s² = t² − x²')"), '.'],
     panel: [
       group('slider()',
@@ -52,24 +64,30 @@ function mount(root: HTMLElement): () => void {
       group('toggle()',
         toggle('Light cone', true, (on) => say(`toggle: ${on}`), { swatch: 'dashed', tone: 'light' }),
         toggle('Worldline', false, (on) => say(`toggle: ${on}`), { swatch: 'line', tone: 'timelike' }),
-        toggle('Plain', true, (on) => say(`toggle: ${on}`)),
       ),
-      group('button() and segmented()',
+      group({ title: ['button()'], aside: [iconButton('Remove', 'close', () => say('iconButton'), true)] },
         el('div', { className: 'actions' },
-          playButton,
-          button('Reset', () => say('Reset'), { icon: 'reset' }),
-          button('Remove', () => say('Remove'), { icon: 'close', iconOnly: true }),
+          button('Filled', () => say('filled'), { variant: 'filled' }),
+          button('Tonal', () => say('tonal'), { variant: 'tonal', icon: 'add' }),
+          button('Outlined', () => say('outlined')),
+          button('Text', () => say('text'), { variant: 'text' }),
         ),
-        segmented({
-          label: 'View',
-          options: [{ value: '2d', label: '2D' }, { value: '3d', label: '3D' }],
-          value: '2d',
-          onChange: (value) => say(`segmented: ${value}`),
-        }),
         log,
       ),
-      group('stat() in stats()', stats(speed, lorentz, proper)),
-      group('defs() and legend()',
+      group('numberField() and select()',
+        row(
+          numberField({ label: 'Time', value: 2, step: 0.1, onChange: (x) => say(`numberField: ${x}`) }).el,
+          select({
+            label: 'Speed',
+            options: [{ value: '0.5', label: '0.5×' }, { value: '1', label: '1×' }, { value: '2', label: '2×' }],
+            value: '1',
+            onChange: (value) => say(`select: ${value}`),
+          }),
+        ),
+      ),
+      group({ title: ['stat() in stats()'], aside: [tag('Outbound', 'prime')] }, stats(speed, lorentz, proper)),
+      group('inset(), defs(), legend(), explain()',
+        inset([dot('var(--cat-3)'), 'Object C'], note('A filled box for editing whatever is selected.')),
         defs(
           [math('γ'), 'the Lorentz factor'],
           [math('Δτ'), 'proper time, read off the moving clock'],
@@ -77,18 +95,22 @@ function mount(root: HTMLElement): () => void {
         legend(
           [swatch('line', 'prime'), 'The moving frame'],
           [swatch('dashed', 'light'), 'Light'],
-          [swatch('line', 'spacelike'), 'A spacelike interval'],
         ),
+        explain('How it works', 'A paragraph of explanation that opens in place.', ['A second one, with ', math('t′ = γ(t − vx)'), '.']),
       ),
     ],
   }));
 
-  return () => root.replaceChildren();
+  return () => {
+    player.stop();
+    root.replaceChildren();
+  };
 }
 
 export const kit: Sim = {
   id: 'kit',
   title: 'UI kit',
   blurb: 'Every control and readout the simulations share, with the call that makes each one. This page is only listed in development.',
+  icon: 'widgets',
   mount,
 };

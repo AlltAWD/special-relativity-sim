@@ -1,4 +1,4 @@
-/* Page shell: base styles, the navigation rail and the simulation header. */
+/* Page shell: base styles, the top app bar, the navigation drawer and the page header. */
 
 *,
 *::before,
@@ -13,9 +13,9 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 400 0.9375rem/1.5 var(--font-ui);
+  background: var(--page);
+  color: var(--on-surface);
+  font: 400 0.875rem/1.25rem var(--font-ui);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -24,7 +24,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -37,29 +37,17 @@ p {
 }
 
 code {
-  font: 0.86em ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
-  padding: 0.1em 0.35em;
+  font: 0.86em ui-monospace, 'Roboto Mono', 'SF Mono', Menlo, Consolas, monospace;
+  padding: 0.1em 0.4em;
   border-radius: 4px;
-  background: var(--sunken);
-  border: 1px solid var(--line);
+  background: var(--fill);
   overflow-wrap: anywhere;
-}
-
-/* Small capitals used for section labels all over the interface. */
-.eyebrow,
-.nav-label,
-.group-title {
-  margin: 0;
-  font: 600 0.6875rem/1.2 var(--font-ui);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
 }
 
 /* Mathematics: variables in italic, numbers and operators upright. See math() in ui/layout.ts. */
 .math {
   font-family: var(--font-math);
-  font-size: 1.08em;
+  font-size: 1.12em;
   font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
 }
@@ -74,15 +62,24 @@ code {
   line-height: 0;
 }
 
+/* An icon from ui/icons.ts. */
+.icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
 .skip-link {
   position: absolute;
   left: 12px;
   top: -64px;
   z-index: 10;
-  padding: 8px 14px;
-  border-radius: var(--radius);
-  background: var(--ink);
-  color: var(--bg);
+  padding: 10px 24px;
+  border-radius: var(--shape-full);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -90,192 +87,163 @@ code {
   top: 12px;
 }
 
-/* ---------- Layout ---------- */
+/* ---------- Layout: app bar across the top, drawer on the left ---------- */
 
 .app {
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr);
+  grid-template-columns: 272px minmax(0, 1fr);
+  grid-template-rows: 64px minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100dvh;
 }
 
-.rail {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  height: 100vh;
-  height: 100dvh;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 1fr auto;
-  gap: 30px 8px;
-  padding: 22px 16px 22px 20px;
-  border-right: 1px solid var(--line);
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 20px;
 }
-
-/* ---------- Brand ---------- */
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 11px;
-  min-width: 0;
-  color: var(--ink);
+  gap: 12px;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--shape-md);
+  color: var(--on-surface-variant);
+  font: 400 1.375rem/1.75rem var(--font-ui);
   text-decoration: none;
-  border-radius: var(--radius);
 }
 
 .brand-mark {
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
 }
 
 .brand-mark-tile {
-  fill: var(--ink);
-  stroke: var(--ink);
+  fill: var(--primary);
 }
 
 .brand-mark-cone {
-  fill: #f0b849;
-  opacity: 0.34;
+  fill: var(--on-primary);
+  opacity: 0.32;
 }
 
 .brand-mark-light {
   fill: none;
-  stroke: #f0b849;
-  stroke-width: 2.1;
+  stroke: var(--on-primary);
+  stroke-width: 2.4;
   stroke-linecap: round;
 }
 
-:root[data-theme='dark'] .brand-mark-tile {
-  fill: var(--sunken);
-  stroke: var(--line-2);
-}
-
-.brand-name {
-  font: 600 1.14rem/1.08 var(--font-math);
-  letter-spacing: -0.005em;
-}
-
-.rail-actions {
+.topbar-actions {
   display: flex;
-  align-items: center;
-  gap: 2px;
+  gap: 4px;
+  margin-left: auto;
 }
 
+/* A round button that is only an icon. */
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  flex: none;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: 0;
-  border-radius: var(--radius);
+  border-radius: 50%;
   background: transparent;
-  color: var(--ink-2);
+  color: var(--on-surface-variant);
   cursor: pointer;
   text-decoration: none;
 }
 
 .icon-btn:hover {
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent);
 }
 
-.icon {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.icon-btn:active {
+  background: color-mix(in srgb, var(--on-surface) 12%, transparent);
 }
 
-/* The toggle shows the theme you would switch to. */
-:root[data-theme='dark'] .icon-moon,
-:root:not([data-theme='dark']) .icon-sun {
-  display: none;
+.icon-btn .icon {
+  width: 24px;
+  height: 24px;
 }
 
-/* ---------- Navigation ---------- */
+/* ---------- Navigation drawer ---------- */
 
-#nav,
-.rail-note {
-  grid-column: 1 / -1;
-  min-width: 0;
-}
-
-.nav-label {
-  margin: 0 0 10px 10px;
+#nav {
+  position: sticky;
+  top: 64px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+  padding: 8px 12px 24px;
+  overflow-y: auto;
 }
 
 .nav-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 2px;
 }
 
 .nav-list a {
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) auto;
-  align-items: baseline;
-  padding: 7px 10px;
-  border-radius: var(--radius);
-  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  padding: 0 24px 0 16px;
+  border-radius: var(--shape-full);
+  color: var(--on-surface-variant);
+  font: 500 0.875rem/1.25rem var(--font-ui);
+  letter-spacing: 0.006em;
   text-decoration: none;
-  font-size: 0.925rem;
-  line-height: 1.35;
 }
 
-.nav-num {
-  font-size: 0.72rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-}
-
-.nav-tag {
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+.nav-list .icon {
+  width: 24px;
+  height: 24px;
 }
 
 .nav-list a:hover {
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent);
 }
 
 .nav-list a[aria-current='page'] {
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--line);
-  color: var(--ink);
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
   font-weight: 600;
 }
 
-/* The one place the chrome borrows a physics colour: the current page is "lit". */
-.nav-list a[aria-current='page'] .nav-num {
-  color: var(--sim-light);
+.nav-tag {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  letter-spacing: 0.03em;
+  opacity: 0.7;
 }
 
-.rail-note {
-  align-self: end;
+.nav-note {
   display: grid;
   gap: 8px;
-  padding: 0 10px;
-  color: var(--ink-2);
-  font-size: 0.84rem;
-  line-height: 1.5;
+  margin-top: auto;
+  padding: 16px;
+  border-radius: var(--shape-lg);
+  background: color-mix(in srgb, var(--on-surface) 5%, transparent);
+  color: var(--on-surface-variant);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
 }
 
-.rail-note .nav-label {
-  margin: 0;
+.nav-note-title {
+  color: var(--on-surface);
+  font-weight: 500;
 }
 
 /* ---------- Main column ---------- */
@@ -285,9 +253,18 @@ main {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 30px clamp(16px, 3.2vw, 44px) 28px;
+  padding: 0 24px 24px 8px;
   /* Lets the workbench respond to this column's width, not the window's. */
   container-type: inline-size;
+}
+
+main:focus {
+  outline: none;
+}
+
+main > * {
+  width: 100%;
+  max-width: 1320px;
 }
 
 #stage {
@@ -297,101 +274,55 @@ main {
   min-height: 0;
 }
 
-main:focus {
-  outline: none;
-}
-
-main > * {
-  max-width: 1280px;
-}
-
 .sim-head {
-  margin-bottom: 20px;
-}
-
-/* With room to spare, the description sits beside the title instead of under it. */
-@container (min-width: 840px) {
-  .sim-head {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: end;
-    column-gap: 40px;
-  }
-
-  .sim-head .eyebrow {
-    grid-column: 1 / -1;
-  }
-
-  .sim-head h1 {
-    margin-bottom: 0;
-  }
-
-  .sim-head .blurb {
-    max-width: 78ch;
-    padding-bottom: 4px;
-    font-size: 0.9375rem;
-  }
-}
-
-.eyebrow {
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 12px;
+  padding: 4px 8px 16px;
 }
 
 h1 {
-  margin: 0 0 8px;
-  font: 600 clamp(1.75rem, 1.35rem + 1.4vw, 2.3rem) / 1.1 var(--font-math);
-  letter-spacing: -0.012em;
+  margin: 0;
+  font: 400 1.75rem/2.25rem var(--font-ui);
   text-wrap: balance;
 }
 
 .blurb {
-  max-width: 68ch;
-  color: var(--ink-2);
-  font-size: 1rem;
+  max-width: 96ch;
+  margin-top: 2px;
+  color: var(--on-surface-variant);
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
   text-wrap: pretty;
 }
 
-/* ---------- Narrow windows: the rail becomes a bar with a scrolling strip ---------- */
+/* ---------- Narrow windows: the drawer becomes a row of scrolling tabs ---------- */
 
 @media (max-width: 1199px) {
   .app {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 56px auto minmax(0, 1fr);
   }
 
-  .rail {
+  .topbar {
+    padding: 0 4px 0 12px;
+  }
+
+  .brand {
+    font-size: 1.25rem;
+  }
+
+  #nav {
     position: static;
+    display: block;
     height: auto;
+    padding: 0;
     overflow: visible;
-    grid-template-rows: auto auto;
-    gap: 10px 8px;
-    padding: 12px 16px 0;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .brand-mark {
-    width: 28px;
-    height: 28px;
-  }
-
-  .brand-name br,
-  .nav-label,
-  .rail-note {
-    display: none;
+    border-bottom: 1px solid var(--outline-variant);
   }
 
   .nav-list {
     display: flex;
-    gap: 4px;
-    margin: 0 -16px;
-    padding: 2px 40px 10px 16px;
+    padding: 0 8px;
     overflow-x: auto;
     scrollbar-width: none;
-    /* Fade the right edge, as a hint that the strip scrolls. */
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
   }
 
   .nav-list::-webkit-scrollbar {
@@ -399,19 +330,56 @@ h1 {
   }
 
   .nav-list a {
-    grid-template-columns: auto auto auto;
-    gap: 7px;
+    position: relative;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 0;
     white-space: nowrap;
   }
 
+  .nav-list .icon,
+  .nav-note {
+    display: none;
+  }
+
+  .nav-list a[aria-current='page'] {
+    background: none;
+    color: var(--primary);
+  }
+
+  /* The active-tab indicator. */
+  .nav-list a[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    bottom: 0;
+    left: 16px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--primary);
+  }
+
+  .nav-list a:focus-visible {
+    outline-offset: -3px;
+  }
+
   main {
-    padding-top: 22px;
+    padding: 16px 16px 24px;
+  }
+
+  .sim-head {
+    padding: 0 4px 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .icon-btn,
   .nav-list a {
-    transition: background-color 0.12s ease, color 0.12s ease;
+    transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
   }
 }

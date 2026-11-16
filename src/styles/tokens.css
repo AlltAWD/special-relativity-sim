@@ -1,71 +1,120 @@
 /*
- * Design tokens. One rule runs through the whole interface:
+ * Design tokens. The interface follows Material Design 3, with the colour
+ * roles, type and shapes of Google's own web apps: a tinted page, white
+ * rounded panes on it, pill-shaped controls, one blue primary colour.
  *
- *   the chrome is neutral, and colour means physics.
+ * The physics palette is Google's four colours, each with one fixed meaning:
  *
- * Buttons, navigation and text use only the ink/paper tokens. A colour appears
- * only where it stands for something in the simulation: green is the moving
- * frame S', gold is light, and blue / rose / gold are the three kinds of
- * interval. A control that changes S' is green, so the panel doubles as the
- * legend for the figure.
+ *   blue   --sim-timelike    timelike intervals; things at rest in S
+ *   red    --sim-spacelike   spacelike intervals; "wrong" classical answers
+ *   yellow --sim-light       light
+ *   green  --sim-prime       the moving frame S' and everything riding in it
+ *
+ * A control that changes one of these takes its colour (tone: 'prime' makes a
+ * slider green), so the panel doubles as the legend for the figure.
  */
 
 :root {
   color-scheme: light;
 
-  /* Chrome */
-  --bg: #f3f4f7;
-  --surface: #ffffff;
-  --sunken: #f5f6f9;
-  --ink: #12151c;
-  --ink-2: #4a5160;
-  --ink-3: #636b7c;
-  --line: #dfe2e8;
-  --line-2: #c4c9d3;
-  --focus: #1763c7;
+  /* Material colour roles */
+  --primary: #0b57d0;
+  --on-primary: #ffffff;
+  --primary-container: #d3e3fd;
+  --on-primary-container: #041e49;
+  --secondary-container: #c2e7ff;
+  --on-secondary-container: #001d35;
+  --on-surface: #1f1f1f;
+  --on-surface-variant: #444746;
+  --outline: #747775;
+  --outline-variant: #c4c7c5;
+  --error: #b3261e;
 
-  /* Physics palette, also read by the canvases through cssVar() in ui/theme.ts. */
+  /* Surfaces, from the outside in: the page, a pane on the page, a filled area in a pane. */
+  --page: #f0f4f9;
+  --pane: #ffffff;
+  --fill: #f0f4f9;
+  --fill-high: #e1e7ef;
+
+  /* Physics palette, also read by the canvases through cssVars() in ui/theme.ts. */
   --sim-bg: #ffffff;
-  --sim-grid: #eceef2;
-  --sim-axis: #12151c;
-  --sim-muted: #636b7c;
-  --sim-prime: #007a65;
-  --sim-light: #9c5c00;
-  --sim-cone: rgba(214, 150, 20, 0.11);
-  --sim-timelike: #1763c7;
-  --sim-spacelike: #c2255c;
-  --sim-lightlike: #9c5c00;
+  --sim-grid: #e9ecf0;
+  --sim-axis: #3c4043;
+  --sim-muted: #5f6368;
+  --sim-prime: #137333;
+  --sim-light: #9a5700;
+  --sim-photon: #fbbc04;
+  --sim-cone: rgba(251, 188, 4, 0.13);
+  --sim-timelike: #1967d2;
+  --sim-spacelike: #c5221f;
+  --sim-lightlike: #9a5700;
 
-  /* Type */
-  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  /* Colours for things the visitor adds (the objects in Highway View). */
+  --cat-1: #1a73e8;
+  --cat-2: #1e8e3e;
+  --cat-3: #e8710a;
+  --cat-4: #9334e6;
+  --cat-5: #e52592;
+  --cat-6: #129eaf;
+  --cat-7: #d93025;
+  --cat-8: #7a5c00;
+
+  /* Type: Google Sans for the interface, STIX Two for mathematics. */
+  --font-ui: 'Google Sans Flex Variable', 'Google Sans', Roboto, system-ui, -apple-system, 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
   --font-math: 'STIX Two Text Variable', 'STIX Two Text', Cambria, 'Times New Roman', Times, serif;
 
   /* Shape */
-  --radius: 7px;
-  --radius-lg: 12px;
+  --shape-sm: 8px;
+  --shape-md: 12px;
+  --shape-lg: 16px;
+  --shape-xl: 24px;
+  --shape-full: 999px;
+
+  /* Elevation and motion */
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --elev-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #0b0d12;
-  --surface: #11141b;
-  --sunken: #171b24;
-  --ink: #e8eaf0;
-  --ink-2: #a9b0bf;
-  --ink-3: #8891a2;
-  --line: #232834;
-  --line-2: #363d4c;
-  --focus: #6cb0ff;
+  --primary: #a8c7fa;
+  --on-primary: #062e6f;
+  --primary-container: #0842a0;
+  --on-primary-container: #d3e3fd;
+  --secondary-container: #004a77;
+  --on-secondary-container: #c2e7ff;
+  --on-surface: #e3e3e3;
+  --on-surface-variant: #c4c7c5;
+  --outline: #8e918f;
+  --outline-variant: #444746;
+  --error: #f2b8b5;
 
-  --sim-bg: #11141b;
-  --sim-grid: #1b202b;
-  --sim-axis: #e8eaf0;
-  --sim-muted: #8891a2;
-  --sim-prime: #3ccfaa;
-  --sim-light: #f0b849;
-  --sim-cone: rgba(240, 184, 73, 0.1);
-  --sim-timelike: #6cb0ff;
-  --sim-spacelike: #ff7aa5;
-  --sim-lightlike: #f0b849;
+  --page: #131314;
+  --pane: #1e1f20;
+  --fill: #282a2c;
+  --fill-high: #333537;
+
+  --sim-bg: #1e1f20;
+  --sim-grid: #2c2e30;
+  --sim-axis: #e3e3e3;
+  --sim-muted: #9aa0a6;
+  --sim-prime: #81c995;
+  --sim-light: #fdd663;
+  --sim-photon: #fdd663;
+  --sim-cone: rgba(253, 214, 99, 0.1);
+  --sim-timelike: #8ab4f8;
+  --sim-spacelike: #f28b82;
+  --sim-lightlike: #fdd663;
+
+  --cat-1: #8ab4f8;
+  --cat-2: #81c995;
+  --cat-3: #fcad70;
+  --cat-4: #c58af9;
+  --cat-5: #ff8bcb;
+  --cat-6: #78d9ec;
+  --cat-7: #f28b82;
+  --cat-8: #fdd663;
 }

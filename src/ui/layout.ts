@@ -1,6 +1,6 @@
 /**
- * Layout pieces shared by the simulations: the workbench (figure beside a
- * control panel), panel groups, readouts, and typeset mathematics.
+ * Layout pieces shared by the simulations: the workbench (a figure pane beside
+ * a controls pane), panel groups, readouts, and typeset mathematics.
  */
 import { el, type Tone } from './controls';
 
@@ -11,10 +11,14 @@ type Child = Node | string;
 export interface BenchParts {
   /** What goes in the figure area: usually one canvas, plus any overlays. */
   figure: Child[];
+  /** A row above the figure: view switch at the start, play controls at the end. */
+  toolbar?: { start?: Child[]; end?: Child[] };
   /** A line under the figure: how to use it, what the units are. */
   caption?: Child[];
   /** Groups of controls and readouts, beside the figure (below it on a phone). */
   panel?: HTMLElement[];
+  /** The figure stacks two plots, so on a phone it should be taller than square. */
+  tall?: boolean;
 }
 
 /**
@@ -23,8 +27,18 @@ export interface BenchParts {
  * reading the result never needs scrolling.
  */
 export function bench(parts: BenchParts): HTMLElement {
-  const figure = el('figure', { className: 'figure' }, el('div', { className: 'figure-frame' }, ...parts.figure));
+  const frame = el('div', { className: 'figure-frame' }, ...parts.figure);
+  if (parts.tall) frame.classList.add('figure-frame--tall');
+  const figure = el('figure', { className: 'figure' });
+  if (parts.toolbar) {
+    figure.append(el('div', { className: 'figure-bar' },
+      el('div', {}, ...(parts.toolbar.start ?? [])),
+      el('div', {}, ...(parts.toolbar.end ?? [])),
+    ));
+  }
+  figure.append(frame);
   if (parts.caption) figure.append(el('figcaption', {}, ...parts.caption));
+
   const root = el('div', { className: 'bench' }, figure);
   if (parts.panel?.length) {
     root.classList.add('bench--split');
@@ -68,6 +82,31 @@ export function note(...children: Child[]): HTMLParagraphElement {
   return el('p', { className: 'note' }, ...children);
 }
 
+/** A small label: a status, a count. */
+export function tag(text: string, tone?: Tone): HTMLSpanElement {
+  const node = el('span', { className: 'tag' }, text);
+  if (tone) node.dataset.tone = tone;
+  return node;
+}
+
+/**
+ * An explanation that opens in place. Each paragraph is a string or a list of
+ * pieces (text and math).
+ *
+ *   explain('How it works', ['The clock ticks every ', math('2L'), ' seconds.'], 'A second paragraph.')
+ */
+export function explain(title: string, ...paragraphs: (Child | Child[])[]): HTMLDetailsElement {
+  return el('details', { className: 'explain' },
+    el('summary', {}, title),
+    ...paragraphs.map((p) => el('p', {}, ...(Array.isArray(p) ? p : [p]))),
+  );
+}
+
+/** A filled box set into the panel: the editor for whatever is selected. */
+export function inset(title: Child[], ...children: Child[]): HTMLDivElement {
+  return el('div', { className: 'inset' }, el('div', { className: 'inset-title' }, ...title), ...children);
+}
+
 /** A two-column list of terms and what they mean. */
 export function defs(...rows: [term: Child, meaning: Child][]): HTMLDListElement {
   const list = el('dl', { className: 'defs' });
@@ -89,6 +128,13 @@ export function srOnly(text: string): HTMLSpanElement {
 
 // ---------- Readouts ----------
 
+export interface StatOptions {
+  value?: string;
+  /** Printed small after the value: 's', 'c', 'y'. */
+  unit?: string;
+  tone?: Tone;
+}
+
 export interface Stat {
   el: HTMLElement;
   /** Show a new value. */
@@ -96,14 +142,16 @@ export interface Stat {
 }
 
 /** One number the simulation reports, with its name above it. */
-export function stat(label: Child, value = '', tone?: Tone): Stat {
-  const output = el('output', { className: 'stat-value' }, value);
+export function stat(label: Child, opts: StatOptions = {}): Stat {
+  const number = document.createTextNode(opts.value ?? '');
+  const output = el('output', { className: 'stat-value' }, number);
+  if (opts.unit) output.append(el('span', { className: 'stat-unit' }, opts.unit));
   const root = el('div', { className: 'stat' }, el('span', { className: 'stat-label' }, label), output);
-  if (tone) root.dataset.tone = tone;
+  if (opts.tone) root.dataset.tone = opts.tone;
   return {
     el: root,
     set(next) {
-      output.textContent = next;
+      if (number.data !== next) number.data = next;
     },
   };
 }

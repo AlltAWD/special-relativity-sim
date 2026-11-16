@@ -1,3 +1,5 @@
+import type { IconName } from '../ui/icons';
+
 /**
  * Every simulation is a plain module with this shape. `mount` builds its DOM
  * inside `root` and returns a cleanup function that removes listeners,
@@ -7,7 +9,7 @@ export interface Sim {
   id: string;
   title: string;
   blurb: string;
-  /** Set on placeholders: the navigation marks the simulation as not ready yet. */
-  soon?: boolean;
+  /** Shown next to the title in the navigation. */
+  icon: IconName;
   mount(root: HTMLElement): () => void;
 }
